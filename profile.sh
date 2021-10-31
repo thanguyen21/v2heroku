@@ -231,17 +231,13 @@
 	function create_launch_script() {
 		cat <<- EOF > "${PREFIX}/bin/start-${directory}"
 		#!/data/data/com.termux/files/usr/bin/bash
-
 		unset LD_PRELOAD
-
 		command="proot"
-
 		command+=" --kernel-release=4.14.98"
 		command+=" --link2symlink"
 		command+=" --kill-on-exit"
 		command+=" --rootfs=${PREFIX}/share/${directory}"
 		command+=" --root-id"
-
 		command+=" --bind=/dev"
 		command+=" --bind=/dev/urandom:/dev/random"
 		command+=" --bind=/proc"
@@ -273,11 +269,9 @@
 		command+=" --bind=${PREFIX}/share/${directory}/proc/.model:/proc/device-tree/model"
 		command+=" --bind=${PREFIX}/share/${directory}/proc/.version:/proc/version"
 		command+=" --bind=${PREFIX}/share/${directory}/proc/.osrelease:/proc/sys/kernel/osrelease"
-		
 		command+=" /usr/bin/env -i"
 		command+=" TERM=\$TERM"
 		command+=" /bin/su --login"
-
 		com="\$@"; [ -z "\$1" ] && exec \$command || \$command "\$com"
 		EOF
 	}
