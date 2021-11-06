@@ -21,28 +21,28 @@ if ! curl --location --output "${tarball}" \
     rm -f "${tarball}"
     exit
 fi
-if [ "$(uname -m)" = "aarch64" ]
+if [ "$(uname -m)" = "aarch64" ]; then
     printf "\n\e[34m[\e[32m*\e[34m]\e[36m Downloading QEMU x86_64, please wait...\n\n\e[34m"
     if ! curl --location --output "${PREFIX}/bin/qemu-x86-64-static" \
-        "https://raw.githubusercontent.com/thanguyen21/ubuntu-focal-x86_64/master/arm64/qemu-x86_64-static"; then
+        "https://raw.githubusercontent.com/thanguyen21/v2heroku/master/qemu/arm64/qemu-x86_64-static"; then
         printf "\n\e[34m[\e[32m*\e[34m]\e[31m Download failed, please check your network connection.\n\n\e[0m"
         rm -f "${tarball}"
         exit
     fi
 fi
-if [ "$(uname -m)" = "armv7l|armv8l" ]
+if [ "$(uname -m)" = "armv7l|armv8l" ]; then
     printf "\n\e[34m[\e[32m*\e[34m]\e[36m Downloading QEMU x86_64, please wait...\n\n\e[34m"
     if ! curl --location --output "${PREFIX}/bin/qemu-x86-64-static" \
-        "https://raw.githubusercontent.com/thanguyen21/ubuntu-focal-x86_64/master/armhf/qemu-x86_64-static"; then
+        "https://raw.githubusercontent.com/thanguyen21/v2heroku/master/qemu/armhf/qemu-x86_64-static"; then
         printf "\n\e[34m[\e[32m*\e[34m]\e[31m Download failed, please check your network connection.\n\n\e[0m"
         rm -f "${tarball}"
         exit
     fi
 fi
-if [ "$(uname -m)" = "i686" ]
+if [ "$(uname -m)" = "i686" ]; then
     printf "\n\e[34m[\e[32m*\e[34m]\e[36m Downloading QEMU x86_64, please wait...\n\n\e[34m"
     if ! curl --location --output "${PREFIX}/bin/qemu-x86-64-static" \
-        "https://raw.githubusercontent.com/thanguyen21/ubuntu-focal-x86_64/master/i386/qemu-x86_64-static"; then
+        "https://raw.githubusercontent.com/thanguyen21/v2heroku/master/qemu/i386/qemu-x86_64-static"; then
         printf "\n\e[34m[\e[32m*\e[34m]\e[31m Download failed, please check your network connection.\n\n\e[0m"
         rm -f "${tarball}"
         exit
