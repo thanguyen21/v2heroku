@@ -1,6 +1,6 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# https://doc-08-3c-docs.googleusercontent.com/docs/securesc/mnjceu6rurp1kqsbfikki3dqqho201t1/epg5bb3mlj7f9dfqmb963blsurqjajlr/1636254750000/15250710412057949618/15250710412057949618/1_aBVL1R6C2tcauD_s4y4_ADA2zzr0Pln?e=download&authuser=0&nonce=aluqi7nhotcj2&user=15250710412057949618&hash=he80c8tov3qbteqrtoqrgr5m1b35n0ee
+# https://drive.google.com/file/d/1_aBVL1R6C2tcauD_s4y4_ADA2zzr0Pln/view?usp=sharing
 
 directory="ubuntu-focal"
 distribution="Ubuntu Focal"
