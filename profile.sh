@@ -1,55 +1,28 @@
 #!/data/data/com.termux/files/usr/bin/bash
-
-# https://drive.google.com/file/d/1_aBVL1R6C2tcauD_s4y4_ADA2zzr0Pln/view?usp=sharing
-
-directory="ubuntu-focal"
-distribution="Ubuntu Focal"
+directory="ubuntu-bionic"
+distribution="Ubuntu Bionic"
 if [ -d "${PREFIX}/share/${directory}" ]; then
-    printf "\n\e[31mError: distribution ${distribution} is already installed.\n\n\e[0m"
-    exit
+printf "\n\e[31mError: distribution ${distribution} is already installed.\n\n\e[0m"
+exit
 fi
 printf "\n\e[34m[\e[32m*\e[34m]\e[36m Checking device architecture...\n\e[0m"
 case $(uname -m) in
-    aarch64|armv7l|armv8l|i686|x86_64) ;;
-    *)
-    printf "\e[34m[\e[32m*\e[34m]\e[31m Unsupported architecture.\n\n\e[0m"; exit ;;
+aarch64) arch="arm64" multiarch="aarch64-linux-gnu" ;;
+armv7l|armv8l) arch="armhf" multiarch="arm-linux-gnueabihf" ;;
+i686) arch="i386" multiarch="i386-linux-gnu" ;;
+x86_64) arch="amd64" multiarch="x86_64-linux-gnu" ;;
+*)
+printf "\e[34m[\e[32m*\e[34m]\e[31m Unsupported architecture.\n\n\e[0m"; exit ;;
 esac
 apt update > /dev/null 2>&1
 apt install -y proot > /dev/null 2>&1
 tarball="rootfs.tar.gz"
 printf "\e[34m[\e[32m*\e[34m]\e[36m Downloading ${distribution}, please wait...\n\n\e[34m"
 if ! curl --location --output "${tarball}" \
-"https://partner-images.canonical.com/core/focal/current/ubuntu-focal-core-cloudimg-amd64-root.tar.gz"; then
-    printf "\n\e[34m[\e[32m*\e[34m]\e[31m Download failed, please check your network connection.\n\n\e[0m"
-    rm -f "${tarball}"
-    exit
-fi
-if [ "$(uname -m)" = "aarch64" ]; then
-    printf "\n\e[34m[\e[32m*\e[34m]\e[36m Downloading QEMU x86_64, please wait...\n\n\e[34m"
-    if ! curl --location --output "${PREFIX}/bin/qemu-x86-64-static" \
-    "https://raw.githubusercontent.com/thanguyen21/v2heroku/master/qemu/arm64/qemu-x86_64-static"; then
-        printf "\n\e[34m[\e[32m*\e[34m]\e[31m Download failed, please check your network connection.\n\n\e[0m"
-        rm -f "${tarball}"
-        exit
-    fi
-fi
-if [ "$(uname -m)" = "armv7l|armv8l" ]; then
-    printf "\n\e[34m[\e[32m*\e[34m]\e[36m Downloading QEMU x86_64, please wait...\n\n\e[34m"
-    if ! curl --location --output "${PREFIX}/bin/qemu-x86-64-static" \
-    "https://raw.githubusercontent.com/thanguyen21/v2heroku/master/qemu/armhf/qemu-x86_64-static"; then
-        printf "\n\e[34m[\e[32m*\e[34m]\e[31m Download failed, please check your network connection.\n\n\e[0m"
-        rm -f "${tarball}"
-        exit
-    fi
-fi
-if [ "$(uname -m)" = "i686" ]; then
-    printf "\n\e[34m[\e[32m*\e[34m]\e[36m Downloading QEMU x86_64, please wait...\n\n\e[34m"
-    if ! curl --location --output "${PREFIX}/bin/qemu-x86-64-static" \
-    "https://raw.githubusercontent.com/thanguyen21/v2heroku/master/qemu/i386/qemu-x86_64-static"; then
-        printf "\n\e[34m[\e[32m*\e[34m]\e[31m Download failed, please check your network connection.\n\n\e[0m"
-        rm -f "${tarball}"
-        exit
-    fi
+"https://partner-images.canonical.com/core/bionic/current/ubuntu-bionic-core-cloudimg-${arch}-root.tar.gz"; then
+printf "\n\e[34m[\e[32m*\e[34m]\e[31m Download failure, please check your Internet again.\n\n\e[0m"
+rm -f "${tarball}"
+exit
 fi
 printf "\n\e[34m[\e[32m*\e[34m]\e[36m Installing ${distribution}, please wait...\n\e[0m"
 mkdir -p "${PREFIX}/share/${directory}"
@@ -57,7 +30,7 @@ proot --link2symlink tar -xf "${tarball}" --directory="${PREFIX}/share/${directo
 rm -f "${tarball}"
 printf "\e[34m[\e[32m*\e[34m]\e[36m Setting up ${distribution}, please wait...\n\e[0m"
 cat <<- EOF > "${PREFIX}/share/${directory}/etc/ld.so.preload"
-/lib/x86_64-linux-gnu/libgcc_s.so.1
+/lib/${multiarch}/libgcc_s.so.1
 EOF
 cat <<- EOF >> "${PREFIX}/share/${directory}/etc/profile"
 export PULSE_SERVER="127.0.0.1"
@@ -191,19 +164,16 @@ cat <<- EOF > "${PREFIX}/share/${directory}/proc/.model"
 $(getprop ro.product.brand) $(getprop ro.product.model)
 EOF
 cat <<- EOF > "${PREFIX}/share/${directory}/proc/.version"
-Linux version 5.8.0 (termux@android) (gcc version 4.9 (GCC)) $(uname -v)
+Linux version 5.4.0 (termux@android) (gcc version 4.9 (GCC)) $(uname -v)
 EOF
 cat <<- EOF > "${PREFIX}/bin/start-${directory}"
 #!/data/data/com.termux/files/usr/bin/bash
 unset LD_PRELOAD
 command="proot"
-command+=" --kernel-release=5.8.0"
+command+=" --kernel-release=5.4.0"
 command+=" --link2symlink"
 command+=" --kill-on-exit"
-command+=" --rootfs=${PREFIX}/share/${directory} -q qemu-x86_64-static"
-if [ "$(uname -m)" = "x86_64" ]; then
-    command+=" --rootfs=${PREFIX}/share/${directory}"
-fi
+command+=" --rootfs=${PREFIX}/share/${directory}"
 command+=" --root-id"
 command+=" --bind=/dev"
 command+=" --bind=/dev/urandom:/dev/random"
@@ -217,16 +187,16 @@ command+=" --bind=/sdcard"
 command+=" --bind=/data/data/com.termux"
 command+=" --bind=${PREFIX}/share/${directory}/tmp:/dev/shm"
 if ! cat /proc/loadavg > /dev/null 2>&1; then
-    command+=" --bind=${PREFIX}/share/${directory}/proc/.loadavg:/proc/loadavg"
+command+=" --bind=${PREFIX}/share/${directory}/proc/.loadavg:/proc/loadavg"
 fi
 if ! cat /proc/stat > /dev/null 2>&1; then
-    command+=" --bind=${PREFIX}/share/${directory}/proc/.stat:/proc/stat"
+command+=" --bind=${PREFIX}/share/${directory}/proc/.stat:/proc/stat"
 fi
 if ! cat /proc/uptime > /dev/null 2>&1; then
-    command+=" --bind=${PREFIX}/share/${directory}/proc/.uptime:/proc/uptime"
+command+=" --bind=${PREFIX}/share/${directory}/proc/.uptime:/proc/uptime"
 fi
 if ! cat /proc/vmstat > /dev/null 2>&1; then
-    command+=" --bind=${PREFIX}/share/${directory}/proc/.vmstat:/proc/vmstat"
+command+=" --bind=${PREFIX}/share/${directory}/proc/.vmstat:/proc/vmstat"
 fi
 command+=" --bind=${PREFIX}/share/${directory}/proc/.model:/proc/device-tree/model"
 command+=" --bind=${PREFIX}/share/${directory}/proc/.version:/proc/version"
@@ -237,6 +207,5 @@ com="\$@"; [ -z "\$1" ] && exec \$command || \$command "\$com"
 EOF
 termux-fix-shebang "${PREFIX}/bin/start-${directory}"
 chmod 700 "${PREFIX}/bin/start-${directory}"
-chmod 700 "${PREFIX}/bin/qemu-x86-64-static"
-printf "\e[34m[\e[32m*\e[34m]\e[36m Installation successfully.\n\n\e[0m"
+printf "\e[34m[\e[32m*\e[34m]\e[36m Successful installation.\n\n\e[0m"
 printf "\e[36mNow run \e[32mstart-${directory}\e[36m to login.\n\n\e[0m"
